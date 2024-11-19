@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriSmart Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1, h3 {
+            color: #5B42F3;
+            margin: 10px 0;
+        }
+
+        .alert {
+            padding: 5px 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            position: relative;
+            background-color: #f8d7da;
+            color: #721c24;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+            color: #721c24;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #fff;
+            background: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        button a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        button:hover {
+            background: linear-gradient(144deg,#00DDEB, #5B42F3 50%,#AF40FF);
+        }
+
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NutriSmart</h1>
+        {% if user.is_authenticated %}
+            <h3>Welcome, {{ user.username }}</h3>
+            <button><a href="{% url 'signout' %}">Sign Out</a></button>
+        {% else %}
+            <h3>Please log in</h3>
+            <button><a href="{% url 'signup' %}">Sign Up</a></button>
+            <button><a href="{% url 'signin' %}">Sign In</a></button>
+        {% endif %}
+    </div>
+
+    <script>
+        function closeAlert(button) {
+            const alert = button.closest('.alert');
+            alert.classList.add('hidden');
+            setTimeout(() => alert.remove(), 300);
+        }
+    </script>
+</body>
+</html>

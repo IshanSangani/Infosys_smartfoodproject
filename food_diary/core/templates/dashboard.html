@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriSmart Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(144deg, #AF40FF, #5B42F3 50%, #00DDEB);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #5B42F3;
+        }
+
+        .user-info {
+            color: #5B42F3;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: linear-gradient(144deg, #AF40FF, #5B42F3 50%, #00DDEB);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            color: #5B42F3;
+            margin: 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #5B42F3;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <div class="user-info">
+                <h1>Welcome, {{ user.first_name }}!</h1>
+                <p>{{ user.email }}</p>
+            </div>
+            <a href="{% url 'signout' %}" class="logout-btn">Sign Out</a>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="dashboard-card">
+                <h2>Your Profile</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ user.height|default:"--" }}</div>
+                        <div class="stat-label">Height (cm)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ user.weight|default:"--" }}</div>
+                        <div class="stat-label">Weight (kg)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ user.calculate_bmi|default:"--" }}</div>
+                        <div class="stat-label">BMI</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h2>Daily Goals</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ user.daily_calorie_goal|default:"--" }}</div>
+                        <div class="stat-label">Calorie Goal</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
