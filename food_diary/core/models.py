@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from pymongo import MongoClient
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from djongo import models as djongo_models
+from bson import ObjectId
 
 class CustomUser(AbstractUser):
     # Additional fields for user profile
@@ -43,6 +46,38 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+class FoodEntry(djongo_models.Model):
+    _id = djongo_models.ObjectIdField(primary_key=True, default=ObjectId)
+    user_id = models.CharField(max_length=100)  # Store user ID as string
+    date_added = models.DateTimeField(auto_now_add=True)
+    image_url = models.CharField(max_length=255)
+    
+    # Food information
+    food_name = models.CharField(max_length=100)
+    quantity = models.FloatField(default=0)
+    grade = models.CharField(max_length=2)
+    
+    # Nutrition information
+    calories = models.FloatField(default=0)
+    proteins = models.FloatField(default=0)
+    carbs = models.FloatField(default=0)
+    fat = models.FloatField(default=0)
+    fiber = models.FloatField(default=0)
+    sugar = models.FloatField(default=0)
+    
+    # Store ingredients as JSON
+    ingredients = djongo_models.JSONField(default=list)
+    
+    # Store raw API response
+    api_response = djongo_models.JSONField(null=True)
+    
+    class Meta:
+        db_table = 'food_entries'
+        ordering = ['-date_added']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.food_name} ({self.date_added})"
 
 def initialize_mongodb_collections():
     try:
