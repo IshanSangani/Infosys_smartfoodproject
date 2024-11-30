@@ -9,18 +9,29 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(144deg, #AF40FF, #5B42F3 50%, #00DDEB);
+            background: linear-gradient(144deg, 
+                rgba(175, 64, 255, 0.75), 
+                rgba(91, 66, 243, 0.75) 50%, 
+                rgba(0, 221, 235, 0.75)),
+                url('https://media.istockphoto.com/id/1182393436/vector/fast-food-seamless-pattern-with-vector-line-icons-of-hamburger-pizza-hot-dog-beverage.jpg?s=612x612&w=0&k=20&c=jlj-n_CNsrd13tkHwC7MVo0cGUyyc8YP6wJQdCvMUGw=');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
             min-height: 100vh;
             color: #333;
         }
 
         .dashboard-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.90);
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             padding: 30px;
             margin: 20px auto;
             max-width: 1200px;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .header {
@@ -47,22 +58,30 @@
         }
 
         .dashboard-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 20px;
-            margin-top: 20px;
         }
 
         .dashboard-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.85);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 0 20px 0;
+            width: auto;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        h1, h2, h3 {
-            color: #5B42F3;
-            margin: 0;
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        h1, h2, h3, p {
+            margin: 0 0 10px 0;
         }
 
         .stats {
@@ -97,7 +116,8 @@
         .file-upload {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin: 0 0 20px 0;
+            align-items: center;
         }
 
         .analyze-btn {
@@ -317,17 +337,15 @@
         }
 
         .uploaded-image-container {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            padding: 0;
         }
 
         .uploaded-image {
             max-width: 100%;
             height: auto;
             border-radius: 8px;
-            margin: 10px 0;
+            display: block;
         }
 
         .image-error {
@@ -358,36 +376,49 @@
         }
 
         .entry-card {
-            background: white;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .entry-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .entry-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 10px 10px 0 0;
         }
 
         .entry-image img {
             width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: cover;
+            display: block;
         }
 
         .entry-details {
             padding: 15px;
         }
 
-        .entry-grade {
+        .entry-details h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .entry-confidence {
             display: inline-block;
             padding: 3px 8px;
-            background: #5B42F3;
-            color: white;
+            background: #e9ecef;
             border-radius: 4px;
             font-size: 0.9em;
-            margin: 5px 0;
+            margin-bottom: 10px;
         }
 
         .entry-nutrition {
@@ -398,83 +429,17 @@
         }
 
         .nutrition-item {
-            font-size: 0.9em;
-        }
-
-        .entry-date {
-            color: #666;
-            font-size: 0.8em;
-            margin-top: 10px;
-        }
-
-        .entries-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .entry-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-
-        .entry-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .entry-image img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .entry-details {
-            padding: 15px;
-        }
-
-        .entry-grade {
-            display: inline-block;
-            padding: 3px 8px;
-            background: #5B42F3;
-            color: white;
-            border-radius: 4px;
-            font-size: 0.9em;
-            margin: 5px 0;
-        }
-
-        .entry-nutrition {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .nutrition-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
             background: #f8f9fa;
-            padding: 8px;
             border-radius: 4px;
         }
 
-        .nutrition-item .label {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .nutrition-item .value {
-            display: block;
-            color: #5B42F3;
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
         .entry-date {
+            font-size: 0.9em;
             color: #666;
-            font-size: 0.8em;
             margin-top: 10px;
         }
 
@@ -619,6 +584,33 @@
         .analyze-btn {
             align-self: flex-start;
         }
+
+        h1, h2, h3 {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .analyze-btn, .logout-btn {
+            background: linear-gradient(144deg, 
+                rgba(175, 64, 255, 0.9), 
+                rgba(91, 66, 243, 0.9) 50%, 
+                rgba(0, 221, 235, 0.9));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .analyze-btn:hover, .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(144deg, 
+                rgba(175, 64, 255, 1), 
+                rgba(91, 66, 243, 1) 50%, 
+                rgba(0, 221, 235, 1));
+        }
     </style>
 </head>
 <body>
@@ -662,10 +654,12 @@
 
             <div class="dashboard-card">
                 <h2>Food Analysis</h2>
-                <form method="post" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'dashboard' %}">
                     {% csrf_token %}
-                    <input type="file" name="food_image" id="food_image" accept="image/jpeg,image/png">
-                    <button type="submit">Upload</button>
+                    <div class="file-upload">
+                        <input type="file" name="food_image" id="food_image" accept="image/*" required>
+                        <button type="submit" class="analyze-btn">Upload & Analyze</button>
+                    </div>
                 </form>
 
                 {% if food_items %}
@@ -735,7 +729,7 @@
             </div>
 
             <div class="dashboard-card">
-                <h2>Recent Food Entries</h2>
+                <h2>Food History</h2>
                 {% if recent_entries %}
                     <div class="entries-grid">
                         {% for entry in recent_entries %}
@@ -749,7 +743,7 @@
                             </div>
                             <div class="entry-details">
                                 <h3>{{ entry.food_name }}</h3>
-                                <span class="entry-grade">Grade: {{ entry.grade }}</span>
+                                <span class="entry-confidence">Confidence: {{ entry.confidence|floatformat:0 }}%</span>
                                 
                                 <div class="entry-nutrition">
                                     <div class="nutrition-item">
@@ -768,6 +762,14 @@
                                         <span class="label">Fat</span>
                                         <span class="value">{{ entry.fat|floatformat:1 }}g</span>
                                     </div>
+                                    <div class="nutrition-item">
+                                        <span class="label">Fiber</span>
+                                        <span class="value">{{ entry.fiber|floatformat:1 }}g</span>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <span class="label">Sugar</span>
+                                        <span class="value">{{ entry.sugar|floatformat:1 }}g</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="entry-date">
@@ -781,16 +783,6 @@
                     <div class="no-entries">
                         <p>No food entries yet. Upload a food image to get started!</p>
                     </div>
-                {% endif %}
-
-                {% if debug %}
-                <div class="debug-panel">
-                    <h4>Debug Information:</h4>
-                    <pre>{{ recent_entries|pprint }}</pre>
-                    <p>Number of entries: {{ recent_entries|length }}</p>
-                    <p>Media URL: {{ MEDIA_URL }}</p>
-                    <p>Media Root: {{ MEDIA_ROOT }}</p>
-                </div>
                 {% endif %}
             </div>
         </div>

@@ -23,7 +23,7 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
-    path('verify-entries/', views.verify_food_entries, name='verify_entries'),
+  
 ]
 
 if settings.DEBUG:

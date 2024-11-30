@@ -1,0 +1,16 @@
+path: "C:/Users/ishan/Downloads/Food-Detection-master (1)/Food-Detection-master/dataset"
+
+train: images/train
+val: images/valid
+test: images/test
+
+nc: 12  # number of classes
+names: ['Apple', 'Chapathi', 'Chicken Gravy', 'Fries', 'Idli', 'Pizza', 'Rice', 'Soda', 'Tomato', 'Vada', 'banana', 'burger']
+
+# Dataset information
+roboflow:
+  workspace: intel-n2yjd
+  project: food-detector-acbog
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/intel-n2yjd/food-detector-acbog/dataset/4 

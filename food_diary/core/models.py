@@ -24,57 +24,29 @@ class CustomUser(AbstractUser):
     class Meta:
         db_table = 'users'  # MongoDB collection name
         
-    def calculate_bmi(self):
-        if self.height and self.weight:
-            height_in_meters = self.height / 100
-            return round(self.weight / (height_in_meters ** 2), 2)
-        return None
-
-    def calculate_recommended_calories(self):
-        if self.weight and self.height and self.date_of_birth and self.gender:
-            # Basic BMR calculation using Harris-Benedict equation
-            age = (timezone.now().date() - self.date_of_birth).days // 365
-            
-            if self.gender == 'M':
-                bmr = 88.362 + (13.397 * self.weight) + (4.799 * self.height) - (5.677 * age)
-            else:
-                bmr = 447.593 + (9.247 * self.weight) + (3.098 * self.height) - (4.330 * age)
-                
-            # Assuming moderate activity level (multiply by 1.55)
-            return round(bmr * 1.55)
-        return None
+   
 
     def __str__(self):
         return self.username
 
 class FoodEntry(djongo_models.Model):
-    _id = djongo_models.ObjectIdField(primary_key=True, default=ObjectId)
-    user_id = models.CharField(max_length=100)  # Store user ID as string
-    date_added = models.DateTimeField(auto_now_add=True)
-    image_url = models.CharField(max_length=255)
-    
-    # Food information
-    food_name = models.CharField(max_length=100)
-    quantity = models.FloatField(default=0)
-    grade = models.CharField(max_length=2)
-    
-    # Nutrition information
-    calories = models.FloatField(default=0)
-    proteins = models.FloatField(default=0)
-    carbs = models.FloatField(default=0)
-    fat = models.FloatField(default=0)
-    fiber = models.FloatField(default=0)
-    sugar = models.FloatField(default=0)
-    
-    # Store ingredients as JSON
-    ingredients = djongo_models.JSONField(default=list)
-    
-    # Store raw API response
-    api_response = djongo_models.JSONField(null=True)
-    
+    _id = djongo_models.ObjectIdField()
+    user_id = djongo_models.CharField(max_length=100)
+    date_added = djongo_models.DateTimeField(default=timezone.now)
+    image_url = djongo_models.URLField(max_length=500)
+    food_name = djongo_models.CharField(max_length=100)
+    confidence = djongo_models.FloatField()
+    calories = djongo_models.FloatField()
+    proteins = djongo_models.FloatField()
+    carbs = djongo_models.FloatField()
+    fat = djongo_models.FloatField()
+    fiber = djongo_models.FloatField()
+    sugar = djongo_models.FloatField()
+    ingredients = djongo_models.JSONField(null=True, blank=True)
+    api_response = djongo_models.JSONField(null=True, blank=True)
+
     class Meta:
         db_table = 'food_entries'
-        ordering = ['-date_added']
 
     def __str__(self):
         return f"{self.user.username} - {self.food_name} ({self.date_added})"

@@ -5,30 +5,39 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(144deg, #AF40FF, #5B42F3 50%, #00DDEB);
+            background: linear-gradient(144deg,
+                rgba(175, 64, 255, 0.75),
+                rgba(91, 66, 243, 0.75) 50%,
+                rgba(0, 221, 235, 0.75)),
+                url('https://media.istockphoto.com/id/1182393436/vector/fast-food-seamless-pattern-with-vector-line-icons-of-hamburger-pizza-hot-dog-beverage.jpg?s=612x612&w=0&k=20&c=jlj-n_CNsrd13tkHwC7MVo0cGUyyc8YP6wJQdCvMUGw=');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: #ffffff;
+            padding: 0;
         }
 
         .container {
+            position: relative;
+            margin: auto;
             background: rgba(255, 255, 255, 0.95);
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            width: 70%;
+            width: 90%;
             max-width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            text-align: center;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -37,8 +46,9 @@
         }
 
         .form-group {
+            position: relative;
             margin-bottom: 20px;
-            text-align: left;
+            width: 100%;
         }
 
         .form-group label {
@@ -55,7 +65,10 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             outline: none;
-            color: #333; 
+            color: #333;
+            box-sizing: border-box;
+            padding-left: 35px;
+            padding-right: 35px;
         }
 
         .form-group input::placeholder {
@@ -68,6 +81,9 @@
         }
 
         button {
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
             padding: 12px 20px;
             font-size: 16px;
             color: #fff;
@@ -76,7 +92,6 @@
             border-radius: 5px;
             cursor: pointer;
             display: block;
-            width: 100%;
             text-align: center;
         }
 
@@ -102,6 +117,31 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        .form-group i {
+            position: absolute;
+            right: 10px;
+            top: 35px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            left: 10px;
+            top: 35px;
+            color: #666;
+        }
+
+        .form-group input {
+            padding-left: 35px;
+            padding-right: 35px;
+        }
+
+        /* Add hover effect for icons */
+        .form-group i:hover {
+            color: #5B42F3;
+        }
     </style>
 </head>
 <body>
@@ -118,14 +158,34 @@
             {% csrf_token %}
             <div class="form-group">
                 <label for="username">Username</label>
+                <i class="input-icon fas fa-user"></i>
                 <input type="text" class="form-control" id="username" name="username" placeholder="Enter Your Username" required>
             </div>
             <div class="form-group">
                 <label for="pass1">Password</label>
+                <i class="input-icon fas fa-lock"></i>
+                <i class="fas fa-eye-slash toggle-password" onclick="togglePassword('pass1', this)"></i>
                 <input type="password" class="form-control" id="pass1" name="pass1" placeholder="Enter Your Password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Sign In</button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
         </form>
     </div>
+
+    <script>
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+    </script>
 </body>
 </html>

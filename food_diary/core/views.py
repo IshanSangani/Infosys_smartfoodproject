@@ -17,6 +17,10 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from bson import ObjectId
+from .ml_model import FoodClassifier
+from pathlib import Path
+from PIL import Image
+import io
 
 # Create a custom filter to exclude MongoDB logs
 class NoMongoFilter(logging.Filter):
@@ -60,6 +64,9 @@ logger.addHandler(file_handler)
 
 # Remove any existing handlers from root logger to avoid duplicate logs
 logging.getLogger('root').handlers = []
+
+# Initialize the classifier
+food_classifier = FoodClassifier()
 
 def home(request):
     return render(request, 'index.html')
@@ -140,168 +147,100 @@ def test_mongodb_connection():
         print(f"MongoDB connection failed: {str(e)}")
         return False
 
-def test_mongodb(request):
-    try:
-        
-        client = MongoClient('mongodb://localhost:27017/')
-        
-        
-        db = client['food_diary_db']
-        
-        
-        db.command('ping')
-        
-        
-        collections = db.list_collection_names()
-        
-        return HttpResponse(
-            f"MongoDB Connection Successful!<br>"
-            f"Database: food_diary_db<br>"
-            f"Collections: {', '.join(collections)}"
-        )
-    except Exception as e:
-        return HttpResponse(f"MongoDB Connection Failed: {str(e)}")
 
 @login_required
 def dashboard(request):
     try:
-        recent_entries = FoodEntry.objects.filter(user_id=str(request.user.id)).order_by('-date_added')
+        food_items = []
+        image_url = None
+        
+        if request.method == 'POST' and request.FILES.get('food_image'):
+            print("POST request received")
+            image_file = request.FILES['food_image']
+            
+            # Create paths
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{timestamp}_food.jpg"
+            relative_path = f'food_images/user_{request.user.id}/{filename}'
+            absolute_path = Path(settings.MEDIA_ROOT) / 'food_images' / f'user_{request.user.id}'
+            
+            try:
+                # Ensure directory exists
+                absolute_path.mkdir(parents=True, exist_ok=True)
+                
+                # Read and validate image
+                image_data = image_file.read()
+                image = Image.open(io.BytesIO(image_data))
+                
+                # Save the image
+                saved_path = default_storage.save(relative_path, ContentFile(image_data))
+                image_url = default_storage.url(saved_path)
+                
+                # Get prediction
+                prediction = food_classifier.predict(image_data)
+                print(f"Prediction result: {prediction}")
+                
+                if prediction and isinstance(prediction, dict):
+                    # Create food item for display
+                    food_items.append({
+                        'name': prediction.get('food_name', 'Unknown Food'),
+                        'grade': f"{prediction.get('confidence', 0.0):.0%}",
+                        'nutrition': prediction.get('nutrition', {})
+                    })
+                    
+                    # Save to MongoDB
+                    food_entry = {
+                        'user_id': str(request.user.id),
+                        'date_added': timezone.now(),
+                        'image_url': image_url,
+                        'food_name': prediction.get('food_name', 'Unknown Food'),
+                        'confidence': prediction.get('confidence', 0.0),
+                        'calories': prediction.get('nutrition', {}).get('calories', 0.0),
+                        'proteins': prediction.get('nutrition', {}).get('proteins', 0.0),
+                        'carbs': prediction.get('nutrition', {}).get('carbs', 0.0),
+                        'fat': prediction.get('nutrition', {}).get('fat', 0.0),
+                        'fiber': prediction.get('nutrition', {}).get('fiber', 0.0),
+                        'sugar': prediction.get('nutrition', {}).get('sugar', 0.0),
+                        'ingredients': [],
+                        'api_response': prediction
+                    }
+                    
+                    # Save to MongoDB using FoodEntry model
+                    entry = FoodEntry(**food_entry)
+                    entry.save()
+                    
+                    messages.success(request, f"Detected {prediction['food_name']} with {prediction['nutrition']['calories']} calories!")
+                    
+                    # Redirect after successful POST to prevent form resubmission
+                    return redirect('dashboard')
+                else:
+                    messages.warning(request, "Could not analyze the food image.")
+                    
+            except Exception as e:
+                print(f"Error processing image: {str(e)}")
+                messages.error(request, "Error processing the image.")
+        
+        # Get recent entries from MongoDB
+        recent_entries = FoodEntry.objects.filter(
+            user_id=str(request.user.id)
+        ).order_by('-date_added')
+        
         context = {
+            'food_items': food_items,
             'recent_entries': recent_entries,
             'debug': settings.DEBUG
         }
         
-        if request.method == 'POST' and request.FILES.get('food_image'):
-            image_file = request.FILES['food_image']
-            logger.info(f"Processing image: {image_file.name}")
-            
-            try:
-                # Read the image content directly from the uploaded file
-                image_content = image_file.read()
-                
-                # Create a simple filename
-                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                extension = '.jpg'  # Default to jpg
-                if image_file.name.lower().endswith('.png'):
-                    extension = '.png'
-                
-                safe_filename = f"{timestamp}_food{extension}"
-                file_path = f'food_images/user_{request.user.id}/{safe_filename}'
-                
-                # Save image directly from content
-                saved_path = default_storage.save(file_path, ContentFile(image_content))
-                image_url = default_storage.url(saved_path)
-                
-                # Make API request
-                url = "https://vision.foodvisor.io/api/1.0/en/analysis/"
-                headers = {"Authorization": f"Api-Key {settings.FOODVISOR_API_KEY}"}
-                
-                logger.info("Sending request to Foodvisor API...")
-                files = {'image': (safe_filename, image_content, 'image/jpeg')}
-                response = requests.post(url, headers=headers, files=files)
-                
-                logger.info(f"API Response Status: {response.status_code}")
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    logger.info(f"API Response Data: {data}")
-                    
-                    # Get the first food item
-                    if data.get('items') and data['items'][0].get('food'):
-                        food_item = data['items'][0]['food'][0]
-                        food_info = food_item.get('food_info', {})
-                        nutrition = food_info.get('nutrition', {})
-                        
-                        # Calculate total nutritional values from all ingredients
-                        total_calories = 0
-                        total_proteins = 0
-                        total_carbs = 0
-                        total_fat = 0
-                        total_fiber = 0
-                        total_sugar = 0
-                        
-                        ingredients_list = []
-                        
-                        # Process each ingredient
-                        for ingredient in food_item.get('ingredients', []):
-                            ing_info = ingredient.get('food_info', {})
-                            ing_nutrition = ing_info.get('nutrition', {})
-                            quantity_factor = ingredient.get('quantity', 0) / 100.0  # Convert to percentage
-                            
-                            # Add to totals
-                            total_calories += ing_nutrition.get('calories_100g', 0) * quantity_factor
-                            total_proteins += ing_nutrition.get('proteins_100g', 0) * quantity_factor
-                            total_carbs += ing_nutrition.get('carbs_100g', 0) * quantity_factor
-                            total_fat += ing_nutrition.get('fat_100g', 0) * quantity_factor
-                            total_fiber += ing_nutrition.get('fibers_100g', 0) * quantity_factor
-                            total_sugar += ing_nutrition.get('sugars_100g', 0) * quantity_factor
-                            
-                            # Add to ingredients list
-                            ingredients_list.append({
-                                'name': ing_info.get('display_name', 'Unknown'),
-                                'quantity': ingredient.get('quantity', 0)
-                            })
-                        
-                        # Create new food entry with calculated values
-                        food_entry = FoodEntry(
-                            user_id=str(request.user.id),
-                            image_url=image_url,
-                            food_name=food_info.get('display_name', 'Unknown Food'),
-                            quantity=food_item.get('quantity', 0.0),
-                            grade=food_info.get('fv_grade', 'N/A'),
-                            calories=total_calories,
-                            proteins=total_proteins,
-                            carbs=total_carbs,
-                            fat=total_fat,
-                            fiber=total_fiber,
-                            sugar=total_sugar,
-                            ingredients=ingredients_list,
-                            api_response=data
-                        )
-                        food_entry.save()
-                        
-                        messages.success(request, "Food analysis completed successfully!")
-                        return redirect('dashboard')
-                    else:
-                        messages.warning(request, "No food items detected in the image.")
-                else:
-                    logger.error(f"API Error: {response.status_code} - {response.text}")
-                    messages.error(request, f"API Error: {response.status_code}")
-                    
-            except Exception as e:
-                logger.error(f"Error processing image: {str(e)}")
-                messages.error(request, f"Error processing image: {str(e)}")
-                
         return render(request, 'dashboard.html', context)
-                
+        
     except Exception as e:
-        logger.error(f"Error retrieving entries: {str(e)}")
-        messages.error(request, "Error retrieving entries")
-        context = {
+        logger.error(f"Error in dashboard view: {str(e)}")
+        messages.error(request, "An error occurred while processing your request.")
+        return render(request, 'dashboard.html', {
+            'food_items': [],
             'recent_entries': [],
             'debug': settings.DEBUG
-        }
-        return render(request, 'dashboard.html', context)
-
-def verify_food_entries(request):
-    if not request.user.is_authenticated:
-        return HttpResponse("Not authenticated")
-    
-    # Get all entries for debugging
-    all_entries = FoodEntry.objects.all()
-    output = []
-    
-    output.append(f"Current user ID: {request.user.id}")
-    output.append(f"Total entries in database: {all_entries.count()}")
-    
-    for entry in all_entries:
-        output.append(f"Entry ID: {entry._id}")
-        output.append(f"User ID: {entry.user_id}")
-        output.append(f"Food Name: {entry.food_name}")
-        output.append(f"Date Added: {entry.date_added}")
-        output.append("---")
-    
-    return HttpResponse("<br>".join(output))
+        })
 
 
 
