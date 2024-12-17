@@ -64,7 +64,7 @@
         }
 
         .dashboard-card {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 243, 224, 0.95);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -78,6 +78,7 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
+            background: rgba(255, 243, 224, 0.98);
         }
 
         h1, h2, h3, p {
@@ -134,10 +135,11 @@
         }
 
         .food-item {
-            background: #f8f9fa;
+            background: rgba(255, 248, 225, 0.95);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .nutrition-grid {
@@ -290,7 +292,7 @@
         }
 
         .nutrition-stat {
-            background: #f8f9fa;
+            background: rgba(255, 236, 179, 0.95);
             padding: 10px;
             border-radius: 4px;
             text-align: center;
@@ -322,7 +324,7 @@
         }
 
         .ingredients li {
-            background: #f8f9fa;
+            background: rgba(255, 236, 179, 0.95);
             padding: 8px 12px;
             margin: 5px 0;
             border-radius: 4px;
@@ -376,7 +378,7 @@
         }
 
         .entry-card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 243, 224, 0.95);
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
@@ -387,6 +389,7 @@
         .entry-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 236, 179, 0.98);
         }
 
         .entry-image {
@@ -479,8 +482,8 @@
         }
 
         .entry-card {
-            background: white;
-            border-radius: 8px;
+            background: rgba(255, 243, 224, 0.95);
+            border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -630,7 +633,7 @@
         }
 
         .profile-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 236, 179, 0.95);
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -674,7 +677,7 @@
         }
 
         .stat-item {
-            background: #f8f9fa;
+            background: rgba(255, 248, 225, 0.95);
             padding: 15px;
             border-radius: 8px;
             display: flex;
@@ -719,7 +722,18 @@
         .tab-content.active {
             display: block;
         }
+
+        .chart-image {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: 20px auto;
+            display: block;
+        }
+
+       
     </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -733,8 +747,13 @@
 
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
-            <div class="nav-tab active" data-tab="profile">Profile</div>
-            <div class="nav-tab" data-tab="food-analysis">Food Analysis</div>
+            <button class="nav-tab" data-tab="profile">Profile</button>
+            <button class="nav-tab" data-tab="food-analysis">Food Analysis</button>
+            <button class="nav-tab" data-tab="bar-chart">Bar Chart</button>
+            <button class="nav-tab" data-tab="line-chart">Line Chart</button>
+            <button class="nav-tab" data-tab="pie-chart">Pie Chart</button>
+            <button class="nav-tab" data-tab="waterfall-chart">Waterfall Chart</button>
+            <button class="nav-tab" data-tab="donut-chart">Donut Chart</button>
         </div>
 
         <!-- Profile Tab Content -->
@@ -906,6 +925,46 @@
                 {% endif %}
             </div>
         </div>
+
+        <!-- Bar Chart Tab Content -->
+        <div id="bar-chart-tab" class="tab-content">
+            <div class="dashboard-card">
+                <h2>Calorie Distribution by Food</h2>
+                <div id="bar-chart"></div>
+            </div>
+        </div>
+
+        <!-- Line Chart Tab Content -->
+        <div id="line-chart-tab" class="tab-content">
+            <div class="dashboard-card">
+                <h2>Calorie Intake Timeline</h2>
+                <div id="line-chart"></div>
+            </div>
+        </div>
+
+        <!-- Pie Chart Tab Content -->
+        <div id="pie-chart-tab" class="tab-content">
+            <div class="dashboard-card">
+                <h2>Nutrient Distribution</h2>
+                <div id="pie-chart"></div>
+            </div>
+        </div>
+
+        <!-- Waterfall Chart Tab Content -->
+        <div id="waterfall-chart-tab" class="tab-content">
+            <div class="dashboard-card">
+                <h2>Calorie Intake Progression</h2>
+                <div id="waterfall-chart"></div>
+            </div>
+        </div>
+
+        <!-- Donut Chart Tab Content -->
+        <div id="donut-chart-tab" class="tab-content">
+            <div class="dashboard-card">
+                <h2>Food Item Distribution</h2>
+                <div id="donut-chart"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1002,6 +1061,23 @@
             const tabId = window.location.hash.substring(1) || 'profile';
             setActiveTab(tabId);
         });
+
+        // Parse and render the charts
+        if ({{ bar_chart|safe }}) {
+            Plotly.newPlot('bar-chart', {{ bar_chart|safe }});
+        }
+        if ({{ line_chart|safe }}) {
+            Plotly.newPlot('line-chart', {{ line_chart|safe }});
+        }
+        if ({{ pie_chart|safe }}) {
+            Plotly.newPlot('pie-chart', {{ pie_chart|safe }});
+        }
+        if ({{ waterfall_chart|safe }}) {
+            Plotly.newPlot('waterfall-chart', {{ waterfall_chart|safe }});
+        }
+        if ({{ donut_chart|safe }}) {
+            Plotly.newPlot('donut-chart', {{ donut_chart|safe }});
+        }
     </script>
 </body>
 </html> 

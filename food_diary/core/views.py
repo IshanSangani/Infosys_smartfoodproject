@@ -21,6 +21,8 @@ from .ml_model import FoodClassifier
 from pathlib import Path
 from PIL import Image
 import io
+import plotly.graph_objects as go
+import plotly.utils
 
 # Create a custom filter to exclude MongoDB logs
 class NoMongoFilter(logging.Filter):
@@ -147,6 +149,91 @@ def test_mongodb_connection():
         print(f"MongoDB connection failed: {str(e)}")
         return False
 
+def generate_bar_chart(entries):
+    if not entries:
+        return None
+    
+    dates = [entry['date_added'].strftime('%Y-%m-%d') for entry in entries]
+    calories = [entry['calories'] for entry in entries]
+    
+    fig = go.Figure(data=[
+        go.Bar(x=dates, y=calories, name='Calories')
+    ])
+    
+    return fig.to_json()
+
+def generate_line_chart(entries):
+    if not entries:
+        return None
+    
+    dates = [entry['date_added'].strftime('%Y-%m-%d') for entry in entries]
+    calories = [entry['calories'] for entry in entries]
+    
+    fig = go.Figure(data=[
+        go.Scatter(x=dates, y=calories, mode='lines+markers', name='Calories')
+    ])
+    
+    return fig.to_json()
+
+def generate_pie_chart(entries):
+    if not entries:
+        return None
+    
+    nutrients = ['proteins', 'carbs', 'fat']
+    values = [sum(entry[nutrient] for entry in entries) for nutrient in nutrients]
+    
+    fig = go.Figure(data=[
+        go.Pie(labels=nutrients, values=values)
+    ])
+    
+    return fig.to_json()
+
+def generate_waterfall_chart(entries):
+    if not entries:
+        return None
+    
+    dates = [entry['date_added'].strftime('%Y-%m-%d') for entry in entries]
+    calories = [entry['calories'] for entry in entries]
+    
+    fig = go.Figure(go.Waterfall(
+        x=dates,
+        y=calories,
+        name="Calorie Changes"
+    ))
+    
+    return fig.to_json()
+
+def generate_donut_chart(entries):
+    if not entries:
+        return None
+    
+    # Include more nutritional factors
+    nutrients = ['proteins', 'carbs', 'fat', 'fiber', 'sugar']
+    values = [sum(entry[nutrient] for entry in entries) for nutrient in nutrients]
+    
+    # Add colors for better visualization
+    colors = ['#FF9999', '#66B2FF', '#99FF99', '#FFCC99', '#FF99CC']
+    
+    fig = go.Figure(data=[
+        go.Pie(
+            labels=nutrients,
+            values=values,
+            hole=.3,
+            marker_colors=colors,
+            textinfo='label+percent',
+            hovertemplate="<b>%{label}</b><br>" +
+                        "Amount: %{value:.1f}g<br>" +
+                        "<extra></extra>"
+        )
+    ])
+    
+    # Update layout for better appearance
+    fig.update_layout(
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    
+    return fig.to_json()
 
 @login_required
 def dashboard(request):
@@ -225,10 +312,18 @@ def dashboard(request):
             user_id=str(request.user.id)
         ).order_by('-date_added')
         
+        # Generate charts
+        recent_entries_list = list(recent_entries.values())
+        
         context = {
             'food_items': food_items,
             'recent_entries': recent_entries,
-            'debug': settings.DEBUG
+            'debug': settings.DEBUG,
+            'bar_chart': generate_bar_chart(recent_entries_list),
+            'line_chart': generate_line_chart(recent_entries_list),
+            'pie_chart': generate_pie_chart(recent_entries_list),
+            'waterfall_chart': generate_waterfall_chart(recent_entries_list),
+            'donut_chart': generate_donut_chart(recent_entries_list)
         }
         
         return render(request, 'dashboard.html', context)
@@ -241,6 +336,5 @@ def dashboard(request):
             'recent_entries': [],
             'debug': settings.DEBUG
         })
-
 
 
